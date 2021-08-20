@@ -1,3 +1,4 @@
+const { validationResult } = require('express-validator');
 const User = require('../models/user');
 
 module.exports.getUserList = (request, response, next) => {
@@ -97,27 +98,44 @@ module.exports.addNewUser = (request, response, next) => {
 }
 
 module.exports.saveUser = (request, response, next) => {
-    const postedData = request.body;
+    const errors = validationResult(request);
 
-    const userModel = new User();
-    return userModel.saveUser(
-        postedData.id, postedData.firstName, postedData.lastName, postedData.age, postedData.gender
-    ).then(data => {
-        const newId = parseInt(data);
-
-        if (newId > 0) {
-            response.writeHead(302, { 'Location': `/users` });
-            return response.end();
-        } else {
-            response.writeHead(200, { 'Content-Type': 'text/html' });
-            response.write(`<p>User not saved :(`);
-            response.write(`
+    if (!errors.isEmpty()) {
+        const errorData = errors.errors;
+        response.writeHead(400, { 'Content-Type': 'text/html' });
+        
+        errorData.forEach(error => {
+            response.write(`<p>${error.param} : ${error.msg}</p>`);            
+        });
+        
+        response.write(`
                 <a href="/">Home</a>
                 <a href="/users">User list</a>
             `);
-            return response.end();
-        }
-    });
+        return response.end();
+    } else {
+        const postedData = request.body;
+
+        const userModel = new User();
+        return userModel.saveUser(
+            postedData.id, postedData.firstName, postedData.lastName, postedData.age, postedData.gender
+        ).then(data => {
+            const newId = parseInt(data);
+
+            if (newId > 0) {
+                response.writeHead(302, { 'Location': `/users` });
+                return response.end();
+            } else {
+                response.writeHead(200, { 'Content-Type': 'text/html' });
+                response.write(`<p>User not saved :(`);
+                response.write(`
+                    <a href="/">Home</a>
+                    <a href="/users">User list</a>
+                `);
+                return response.end();
+            }
+        });
+    }
 }
 
 module.exports.viewUserDetails = (request, response, next) => {
