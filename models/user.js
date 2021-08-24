@@ -1,17 +1,21 @@
-const userQuery = require('../query/user');
+const UserDataAccess = require('../dataaccess/user');
 
 class User {
+    constructor() {
+        this.userQuery = new UserDataAccess();
+    }
+
     getUserList() {
-        return userQuery.getUserList();
+        return this.userQuery.getUserList();
     }
 
     getUserDetails(id) {
-        return userQuery.getUserDetails(id);
+        return this.userQuery.getUserDetails(id);
     }
 
     saveUser(id, firstName, lastName, age, gender) {
         try {
-            return userQuery.saveUser(id, firstName, lastName,age, gender);
+            return this.userQuery.saveUser(id, firstName, lastName,age, gender);
         }
         catch(ex) {
             console.log(ex);
@@ -21,7 +25,7 @@ class User {
 
     deleteUser(id) {
         try {
-            return userQuery.deleteUser(id);
+            return this.userQuery.deleteUser(id);
         }
         catch(ex) {
             console.log(ex);
